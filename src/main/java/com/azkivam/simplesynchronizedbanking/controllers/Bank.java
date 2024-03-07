@@ -12,4 +12,29 @@ public class Bank {
         return "Hello world " + arg;
     }
 
+    @ShellMethod(key = "create")
+    public String createAccount(String arg){
+        return "Hello world " + arg;
+    }
+
+    @ShellMethod(key = "deposit")
+    public String deposit(@ShellOption(defaultValue = "spring")String arg){
+        return "Hello world " + arg;
+    }
+
+    @ShellMethod(key = "withdraw")
+    public String withdraw(@ShellOption(defaultValue = "spring")String arg){
+        return "Hello world " + arg;
+    }
+
+    @ShellMethod(key = "transfer")
+    public String transfer(@ShellOption(defaultValue = "spring")String arg){
+        return "Hello world " + arg;
+    }
+
+    @ShellMethod(key = "balance")
+    public String balance(@ShellOption(defaultValue = "spring")String arg){
+        return "Hello world " + arg;
+    }
+
 }
