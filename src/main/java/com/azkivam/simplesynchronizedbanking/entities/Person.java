@@ -17,10 +17,18 @@ public class Person {
         this.name = name;
     }
 
+//    public Person(Long id) {
+//        this.id = id;
+//    }
+
     private String name;
 
     @OneToMany(mappedBy = "person")
     private Set<BankAccount> accountSet = new HashSet<>();
+
+    public Person() {
+
+    }
 
     public Long getId() {
         return id;
@@ -44,5 +52,13 @@ public class Person {
 
     public void setAccountSet(Set<BankAccount> accountSet) {
         this.accountSet = accountSet;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
     }
 }
