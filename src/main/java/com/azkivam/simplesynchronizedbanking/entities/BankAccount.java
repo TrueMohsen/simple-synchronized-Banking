@@ -12,6 +12,9 @@ public class BankAccount {
     @Column(unique=true)
     private Long account_number;
 
+    @ManyToOne(cascade = {CascadeType.PERSIST,CascadeType.REMOVE})
+    @JoinColumn(name = "person_id")
+    private Person person;
 
 
 }

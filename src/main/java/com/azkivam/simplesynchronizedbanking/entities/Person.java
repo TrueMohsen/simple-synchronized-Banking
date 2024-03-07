@@ -1,9 +1,11 @@
 package com.azkivam.simplesynchronizedbanking.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 @Entity
 public class Person {
@@ -12,4 +14,9 @@ public class Person {
     private Long id;
 
     private String name;
+
+    @OneToMany(mappedBy = "person")
+    private Set<BankAccount> accountSet = new HashSet<>();
+
+
 }

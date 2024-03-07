@@ -7,32 +7,27 @@ import org.springframework.shell.standard.ShellOption;
 @ShellComponent
 public class Bank {
 
-    @ShellMethod(key = "hello-world")
-    public String helloWorld(@ShellOption(defaultValue = "spring")String arg){
-        return "Hello world " + arg;
+    @ShellMethod(value = "Create Account.",key = "create")
+    public String createAccount(String personName){
+        return "Account created for " + personName;
     }
 
-    @ShellMethod(key = "create")
-    public String createAccount(String arg){
-        return "Hello world " + arg;
-    }
-
-    @ShellMethod(key = "deposit")
+    @ShellMethod(value = "Deposit into an Account.",key = "deposit")
     public String deposit(@ShellOption(defaultValue = "spring")String arg){
         return "Hello world " + arg;
     }
 
-    @ShellMethod(key = "withdraw")
+    @ShellMethod(value = "Withdraw from an Account.",key = "withdraw")
     public String withdraw(@ShellOption(defaultValue = "spring")String arg){
         return "Hello world " + arg;
     }
 
-    @ShellMethod(key = "transfer")
+    @ShellMethod(value = "Transfer From One Account to Another.",key = "transfer")
     public String transfer(@ShellOption(defaultValue = "spring")String arg){
         return "Hello world " + arg;
     }
 
-    @ShellMethod(key = "balance")
+    @ShellMethod(value = "Get The Balance of An Account.",key = "balance")
     public String balance(@ShellOption(defaultValue = "spring")String arg){
         return "Hello world " + arg;
     }
