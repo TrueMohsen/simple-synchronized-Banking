@@ -1,5 +1,8 @@
 package com.azkivam.simplesynchronizedbanking.controllers;
 
+import com.azkivam.simplesynchronizedbanking.entities.Person;
+import com.azkivam.simplesynchronizedbanking.services.PersonService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -7,7 +10,17 @@ import org.springframework.shell.standard.ShellOption;
 @ShellComponent
 public class Bank {
 
-    @ShellMethod(value = "Create Account.",key = "create")
+    @Autowired
+    private PersonService personService;
+
+    @ShellMethod(value = "Create Person.",key = "create-p")
+    public String createPerson(String personName){
+        Person person = new Person(personName);
+        personService.create(person);
+        return "Person created " + personName;
+    }
+
+    @ShellMethod(value = "Create Account.",key = "create-a")
     public String createAccount(String personName){
         return "Account created for " + personName;
     }
