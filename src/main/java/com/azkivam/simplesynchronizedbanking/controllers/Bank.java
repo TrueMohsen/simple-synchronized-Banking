@@ -4,8 +4,6 @@ import com.azkivam.simplesynchronizedbanking.entities.BankAccount;
 import com.azkivam.simplesynchronizedbanking.entities.Person;
 import com.azkivam.simplesynchronizedbanking.services.BankAccountService;
 import com.azkivam.simplesynchronizedbanking.services.PersonService;
-import com.azkivam.simplesynchronizedbanking.utilities.HibernateUtil;
-import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -24,12 +22,6 @@ public class Bank {
     private BankAccountService bankAccountService;
 
 
-    private Session session ;
-
-    public Bank() {
-        this.session = HibernateUtil.getSessionFactory().openSession();
-    }
-
     @ShellMethod(value = "Create Person.",key = "create-p")
     public String createPerson(String personName){
         Person person = new Person(personName);
@@ -42,7 +34,7 @@ public class Bank {
         return personService.getAll();
     }
 
-    @ShellMethod(value = "List all Persons.",key = "get-p")
+    @ShellMethod(value = "Show One Person.",key = "get-p")
     public Optional<Person> getPerson(String personId){
         return personService.get(Long.valueOf(personId));
     }
@@ -53,16 +45,11 @@ public class Bank {
     }
 
     @ShellMethod(value = "Create Account.",key = "create-a")
-    public String createAccount(String personId,String accountNumber){
+    public String createAccount(String personId,String accountNumber, String initialAmount){
         Optional<Person> person = personService.get(Long.valueOf(personId));
-        session.beginTransaction();
-        session.merge(person);
         if(person.isPresent()){
-            BankAccount bankAccount = new BankAccount(person.get(),Long.valueOf(accountNumber));
+            BankAccount bankAccount = new BankAccount(person.get(),Long.valueOf(accountNumber),Long.valueOf(initialAmount));
             bankAccountService.create(bankAccount);
-            session.save(bankAccount);
-            session.getTransaction().commit();
-            session.close();
             return "Account created for " + person.get().getName();
         }else{
             return "Error";
@@ -70,8 +57,14 @@ public class Bank {
     }
 
     @ShellMethod(value = "Deposit into an Account.",key = "deposit")
-    public String deposit(@ShellOption(defaultValue = "spring")String arg){
-        return "Hello world " + arg;
+    public String deposit(String accountNumber, String Amount){
+        if(bankAccountService.exists(Long.valueOf(accountNumber))){
+            Optional<BankAccount> bankAccount = bankAccountService.fetch(Long.valueOf(accountNumber));
+            bankAccount.get().setBalance(Long.valueOf(Amount));
+            return "Deposit into account was successful";
+        }else{
+            return "There is no such account!";
+        }
     }
 
     @ShellMethod(value = "Withdraw from an Account.",key = "withdraw")
