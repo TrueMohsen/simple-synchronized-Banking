@@ -61,6 +61,7 @@ public class Bank {
         if(bankAccountService.exists(Long.valueOf(accountNumber))){
             Optional<BankAccount> bankAccount = bankAccountService.fetch(Long.valueOf(accountNumber));
             bankAccount.get().setBalance(Long.valueOf(Amount));
+            bankAccountService.update(bankAccount.get());
             return "Deposit into account was successful";
         }else{
             return "There is no such account!";
