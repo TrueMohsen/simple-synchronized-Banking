@@ -1,6 +1,7 @@
 package com.azkivam.simplesynchronizedbanking.entities;
 
 import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
 
 import java.util.Collection;
 import java.util.HashSet;

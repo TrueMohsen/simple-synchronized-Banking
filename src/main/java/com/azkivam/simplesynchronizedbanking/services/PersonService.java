@@ -3,6 +3,7 @@ package com.azkivam.simplesynchronizedbanking.services;
 import com.azkivam.simplesynchronizedbanking.entities.Person;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PersonService {
 
@@ -11,6 +12,6 @@ public interface PersonService {
     Person create(Person person);
     Person update(Person person);
 
-    Person get(Long personId);
+    Optional<Person> get(Long personId);
     List<Person> getAll();
 }

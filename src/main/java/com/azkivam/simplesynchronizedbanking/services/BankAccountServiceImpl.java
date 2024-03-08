@@ -6,6 +6,8 @@ import com.azkivam.simplesynchronizedbanking.repositories.BankAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class BankAccountServiceImpl implements BankAccountService{
 
@@ -27,5 +29,10 @@ public class BankAccountServiceImpl implements BankAccountService{
     public BankAccount update(BankAccount bankAccount) {
         bankAccountRepository.save(bankAccount);
         return bankAccount;
+    }
+
+    @Override
+    public List<BankAccount> getAll() {
+        return bankAccountRepository.findAll();
     }
 }

@@ -4,12 +4,15 @@ import com.azkivam.simplesynchronizedbanking.entities.BankAccount;
 import com.azkivam.simplesynchronizedbanking.entities.Person;
 import com.azkivam.simplesynchronizedbanking.services.BankAccountService;
 import com.azkivam.simplesynchronizedbanking.services.PersonService;
+import com.azkivam.simplesynchronizedbanking.utilities.HibernateUtil;
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 import java.util.List;
+import java.util.Optional;
 
 @ShellComponent
 public class Bank {
@@ -19,6 +22,13 @@ public class Bank {
 
     @Autowired
     private BankAccountService bankAccountService;
+
+
+    private Session session ;
+
+    public Bank() {
+        this.session = HibernateUtil.getSessionFactory().openSession();
+    }
 
     @ShellMethod(value = "Create Person.",key = "create-p")
     public String createPerson(String personName){
@@ -32,14 +42,28 @@ public class Bank {
         return personService.getAll();
     }
 
+    @ShellMethod(value = "List all Persons.",key = "get-p")
+    public Optional<Person> getPerson(String personId){
+        return personService.get(Long.valueOf(personId));
+    }
+
+    @ShellMethod(value = "List all Accounts.",key = "list-a")
+    public List<BankAccount> getAccounts(){
+        return bankAccountService.getAll();
+    }
+
     @ShellMethod(value = "Create Account.",key = "create-a")
     public String createAccount(String personId,String accountNumber){
-        Person person = personService.get(Long.valueOf(personId));
-        if(personService.exists(Long.valueOf(personId))){
-
-            BankAccount bankAccount = new BankAccount(person,Long.valueOf(accountNumber));
+        Optional<Person> person = personService.get(Long.valueOf(personId));
+        session.beginTransaction();
+        session.merge(person);
+        if(person.isPresent()){
+            BankAccount bankAccount = new BankAccount(person.get(),Long.valueOf(accountNumber));
             bankAccountService.create(bankAccount);
-            return "Account created for " + person.getName();
+            session.save(bankAccount);
+            session.getTransaction().commit();
+            session.close();
+            return "Account created for " + person.get().getName();
         }else{
             return "Error";
         }
