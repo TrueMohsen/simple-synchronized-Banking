@@ -57,10 +57,10 @@ public class Bank {
     }
 
     @ShellMethod(value = "Deposit into an Account.",key = "deposit")
-    public String deposit(String accountNumber, String amount){
+    public synchronized String deposit(String accountNumber, String amount){
         if(bankAccountService.exists(Long.valueOf(accountNumber))){
             Optional<BankAccount> bankAccount = bankAccountService.fetch(Long.valueOf(accountNumber));
-            bankAccount.get().setBalance(Long.valueOf(amount));
+            bankAccount.get().setBalance(bankAccount.get().getBalance()+Long.valueOf(amount));
             bankAccountService.update(bankAccount.get());
             return "Deposit into account was successful";
         }else{
@@ -69,7 +69,7 @@ public class Bank {
     }
 
     @ShellMethod(value = "Withdraw from an Account.",key = "withdraw")
-    public String withdraw(String accountNumber, String amount){
+    public synchronized String withdraw(String accountNumber, String amount){
         if(bankAccountService.exists(Long.valueOf(accountNumber))){
             Optional<BankAccount> bankAccount = bankAccountService.fetch(Long.valueOf(accountNumber));
             //here it must be checked if it is greater than zero
@@ -82,7 +82,7 @@ public class Bank {
     }
 
     @ShellMethod(value = "Transfer From One Account to Another.",key = "transfer")
-    public String transfer(String sourceAccountNumber,String desAccountNumber, String amount){
+    public synchronized String transfer(String sourceAccountNumber,String desAccountNumber, String amount){
         if(bankAccountService.exists(Long.valueOf(sourceAccountNumber)) && bankAccountService.exists(Long.valueOf(desAccountNumber))){
             Optional<BankAccount> sourceBankAccount = bankAccountService.fetch(Long.valueOf(sourceAccountNumber));
             Optional<BankAccount> desBankAccount = bankAccountService.fetch(Long.valueOf(desAccountNumber));
