@@ -57,10 +57,10 @@ public class Bank {
     }
 
     @ShellMethod(value = "Deposit into an Account.",key = "deposit")
-    public String deposit(String accountNumber, String Amount){
+    public String deposit(String accountNumber, String amount){
         if(bankAccountService.exists(Long.valueOf(accountNumber))){
             Optional<BankAccount> bankAccount = bankAccountService.fetch(Long.valueOf(accountNumber));
-            bankAccount.get().setBalance(Long.valueOf(Amount));
+            bankAccount.get().setBalance(Long.valueOf(amount));
             bankAccountService.update(bankAccount.get());
             return "Deposit into account was successful";
         }else{
@@ -69,18 +69,47 @@ public class Bank {
     }
 
     @ShellMethod(value = "Withdraw from an Account.",key = "withdraw")
-    public String withdraw(@ShellOption(defaultValue = "spring")String arg){
-        return "Hello world " + arg;
+    public String withdraw(String accountNumber, String amount){
+        if(bankAccountService.exists(Long.valueOf(accountNumber))){
+            Optional<BankAccount> bankAccount = bankAccountService.fetch(Long.valueOf(accountNumber));
+            //here it must be checked if it is greater than zero
+            bankAccount.get().setBalance(bankAccount.get().getBalance()-Long.parseLong(amount));
+            bankAccountService.update(bankAccount.get());
+            return "withdraw from account was successful";
+        }else{
+            return "There is no such account!";
+        }
     }
 
     @ShellMethod(value = "Transfer From One Account to Another.",key = "transfer")
-    public String transfer(@ShellOption(defaultValue = "spring")String arg){
-        return "Hello world " + arg;
+    public String transfer(String sourceAccountNumber,String desAccountNumber, String amount){
+        if(bankAccountService.exists(Long.valueOf(sourceAccountNumber)) && bankAccountService.exists(Long.valueOf(desAccountNumber))){
+            Optional<BankAccount> sourceBankAccount = bankAccountService.fetch(Long.valueOf(sourceAccountNumber));
+            Optional<BankAccount> desBankAccount = bankAccountService.fetch(Long.valueOf(desAccountNumber));
+            if(sourceBankAccount.get().getBalance() >= Long.parseLong(amount) ){
+                sourceBankAccount.get().setBalance(sourceBankAccount.get().getBalance()-Long.parseLong(amount));
+                desBankAccount.get().setBalance(desBankAccount.get().getBalance()+Long.parseLong(amount));
+                bankAccountService.update(sourceBankAccount.get());
+                bankAccountService.update(desBankAccount.get());
+            }else{
+                return "Not enough balance to transfer!";
+            }
+
+        }else{
+            return "source bankAccount or destination bankAccount deos not exist!";
+        }
+
+        return "transfer";
     }
 
     @ShellMethod(value = "Get The Balance of An Account.",key = "balance")
-    public String balance(@ShellOption(defaultValue = "spring")String arg){
-        return "Hello world " + arg;
+    public String balance(String accountNumber){
+
+        if(bankAccountService.exists(Long.valueOf(accountNumber))){
+            Optional<BankAccount> bankAccount = bankAccountService.fetch(Long.valueOf(accountNumber));
+            return String.valueOf(bankAccount.get().getBalance());
+        }
+        return "Balance!";
     }
 
 }
