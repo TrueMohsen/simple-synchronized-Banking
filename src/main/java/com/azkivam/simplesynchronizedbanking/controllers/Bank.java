@@ -4,10 +4,14 @@ import com.azkivam.simplesynchronizedbanking.entities.BankAccount;
 import com.azkivam.simplesynchronizedbanking.entities.Person;
 import com.azkivam.simplesynchronizedbanking.services.BankAccountService;
 import com.azkivam.simplesynchronizedbanking.services.PersonService;
+import com.azkivam.simplesynchronizedbanking.utilities.Material;
+import com.azkivam.simplesynchronizedbanking.utilities.Receiver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
@@ -22,7 +26,11 @@ public class Bank {
     @Autowired
     private BankAccountService bankAccountService;
 
+    @Autowired
+    private Receiver receiver;
+
     ExecutorService executorService = Executors.newFixedThreadPool(10);
+
 
     @ShellMethod(value = "Switch.",key = "switch")
     public void select(String switchKey){
@@ -30,9 +38,13 @@ public class Bank {
             case "1" -> executorService.execute(ListPersons());
             case "2" -> executorService.execute(listAccounts());
             case "3" -> {
+//                Map<Material,Boolean> controlUnit = new HashMap<>();
+//                controlUnit.put(Material.NAME,true);
+//                Map<Material,String> result = receiver.receiveController(controlUnit);
                 Scanner scanner = new Scanner(System.in);
                 System.out.println("Enter name:");
                 String name = scanner.nextLine();
+//                System.out.println(result.get(Material.NAME));
                 executorService.execute(createPerson(name));
             }
             case "4" -> {
