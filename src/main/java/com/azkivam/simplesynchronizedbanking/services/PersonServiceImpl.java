@@ -51,4 +51,9 @@ public class PersonServiceImpl implements PersonService{
         return personRepository.findAll();
     }
 
+    @Override
+    public void deletePerson(String personId) {
+        personRepository.deleteById(Long.valueOf(personId));
+    }
+
 }

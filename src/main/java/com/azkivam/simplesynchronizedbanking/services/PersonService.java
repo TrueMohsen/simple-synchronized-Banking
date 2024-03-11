@@ -14,4 +14,6 @@ public interface PersonService {
 
     Optional<Person> get(Long personId);
     List<Person> getAll();
+
+    void deletePerson(String personId);
 }

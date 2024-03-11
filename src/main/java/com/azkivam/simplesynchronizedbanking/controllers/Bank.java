@@ -126,6 +126,14 @@ public class Bank implements Subject {
                 Notify();
                 executorService.execute(balanceCase(sourceAccountNumber));
             }
+            case "10" -> {
+                Scanner scanner = new Scanner(System.in);
+                System.out.println("Enter Person Id:");
+                String personID = scanner.nextLine();
+                setState(" None "," Delete Person "," None ");
+                Notify();
+                executorService.execute(deletePersonCase(personID));
+            }
         }
 
     }
@@ -196,6 +204,8 @@ public class Bank implements Subject {
                     Person person = new Person(name);
                     personService.create(person);
                     System.out.println(name + " created successfully");
+                }else{
+                    System.out.println(name + " is not a valid name! It must be between 3 and 11 characters long.");
                 }
 
             }
@@ -281,6 +291,27 @@ public class Bank implements Subject {
             @Override
             public void run() {
                 balance(sourceAccountNumber);
+            }
+        };
+
+    }
+    public Runnable deletePersonCase(String personID){
+        return new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    Long personId = Long.valueOf(personID);
+                    Optional<Person> person = personService.get(personId);
+                    if(person.isPresent()){
+                        personService.deletePerson(personID);
+                        System.out.println("Person Deleted Successfuly!");
+                    }else{
+                        System.out.println("Such Person is Not Available!");
+                    }
+                }catch (Exception e){
+                    System.out.println(e.getMessage());
+                }
+
             }
         };
 
