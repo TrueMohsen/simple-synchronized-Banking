@@ -185,9 +185,11 @@ public class Bank implements Subject {
 
 
     public synchronized void balance(String accountNumber){
-            if(bankAccountService.exists(Long.valueOf(accountNumber))){
-                Optional<BankAccount> bankAccount = bankAccountService.fetch(Long.valueOf(accountNumber));
+        Optional<BankAccount> bankAccount = bankAccountService.fetchByAccountNumber(Long.valueOf(accountNumber));
+            if(bankAccount.isPresent()){
                 System.out.println("Balance is : "+bankAccount.get().getBalance());
+            }else{
+                System.out.println("There is no such Account with this account number!");
             }
     }
 
