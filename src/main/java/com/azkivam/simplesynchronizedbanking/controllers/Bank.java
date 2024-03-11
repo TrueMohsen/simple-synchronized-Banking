@@ -158,8 +158,9 @@ public class Bank implements Subject {
     }
 
     public synchronized void withdraw(String accountNumber, String amount){
-        if(bankAccountService.exists(Long.valueOf(accountNumber))){
-            Optional<BankAccount> bankAccount = bankAccountService.fetch(Long.valueOf(accountNumber));
+        Optional<BankAccount> bankAccount = bankAccountService.fetchByAccountNumber(Long.valueOf(accountNumber));
+        if(bankAccount.isPresent()){
+
             //here it must be checked if it is greater than zero
             bankAccount.get().setBalance(bankAccount.get().getBalance()-Long.parseLong(amount));
             bankAccountService.update(bankAccount.get());
