@@ -14,4 +14,6 @@ public interface BankAccountService {
 
     List<BankAccount>getAll();
     Optional<BankAccount> fetch(Long bankAccountNumber);
+
+    Optional<BankAccount> fetchByAccountNumber(Long bankAccountNumber);
 }

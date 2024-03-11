@@ -94,7 +94,7 @@ public class Bank implements Subject {
                 String amount = scanner.nextLine();
                 setState(accountNumber,"Deposit",amount);
                 Notify();
-                executorService.execute(deposit(accountNumber,amount));
+                executorService.execute(depositCase(accountNumber,amount));
             }
             case "7" -> {
                 Scanner scanner = new Scanner(System.in);
@@ -167,6 +167,19 @@ public class Bank implements Subject {
         }else{
             System.out.println("There is no such account!");
         }
+    }
+
+    public synchronized void deposit(String accountNumber, String amount){
+        Optional<BankAccount> bankAccount = bankAccountService.fetchByAccountNumber(Long.valueOf(accountNumber));
+
+        if(bankAccount.isPresent()){
+            bankAccount.get().setBalance(bankAccount.get().getBalance()+Long.parseLong(amount));
+            bankAccountService.update(bankAccount.get());
+            System.out.println("Deposit into account was successful");
+        }else{
+            System.out.println("There is no such account!");
+        }
+
     }
 
 
@@ -251,18 +264,11 @@ public class Bank implements Subject {
 
     }
 
-    public Runnable deposit(String accountNumber,String amount){
+    public Runnable depositCase(String accountNumber,String amount){
         return new Runnable() {
             @Override
             public void run() {
-                if(bankAccountService.exists(Long.valueOf(accountNumber))){
-                    Optional<BankAccount> bankAccount = bankAccountService.fetch(Long.valueOf(accountNumber));
-                    bankAccount.get().setBalance(bankAccount.get().getBalance()+Long.parseLong(amount));
-                    bankAccountService.update(bankAccount.get());
-                    System.out.println("Deposit into account was successful");
-                }else{
-                    System.out.println("There is no such account!");
-                }
+                deposit(accountNumber,amount);
             }
         };
 

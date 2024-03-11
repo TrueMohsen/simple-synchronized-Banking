@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -44,5 +45,16 @@ public class BankAccountServiceImpl implements BankAccountService{
 
     public Optional<BankAccount> fetch(Long bankAccountNumber) {
         return bankAccountRepository.findById(bankAccountNumber);
+    }
+
+    @Override
+    public Optional<BankAccount> fetchByAccountNumber(Long bankAccountNumber) {
+        List<BankAccount> bankAccountList = bankAccountRepository.findAll();
+        for(BankAccount ba:bankAccountList){
+            if(Objects.equals(ba.getAccount_number(), bankAccountNumber)){
+                return Optional.of(ba);
+            }
+        }
+        return Optional.empty();
     }
 }
