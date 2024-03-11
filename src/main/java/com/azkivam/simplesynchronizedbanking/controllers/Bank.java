@@ -8,6 +8,7 @@ import com.azkivam.simplesynchronizedbanking.utilities.Material;
 import com.azkivam.simplesynchronizedbanking.utilities.Receiver;
 import com.azkivam.simplesynchronizedbanking.utilities.Subject;
 import com.azkivam.simplesynchronizedbanking.utilities.TransactionObserver;
+import com.azkivam.simplesynchronizedbanking.validators.InputValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -32,7 +33,10 @@ public class Bank implements Subject {
     ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     @Autowired
-    List<TransactionObserver> observers ;
+    List<TransactionObserver> observers;
+
+    @Autowired
+    private InputValidator validator;
 
 
     Map<Material,String> state = new HashMap<>();
@@ -188,9 +192,12 @@ public class Bank implements Subject {
         return new Runnable() {
             @Override
             public void run() {
-                Person person = new Person(name);
-                personService.create(person);
-                System.out.println(name + " created successfully");
+                if (validator.checkNameLength(name)){
+                    Person person = new Person(name);
+                    personService.create(person);
+                    System.out.println(name + " created successfully");
+                }
+
             }
         };
 
@@ -199,7 +206,16 @@ public class Bank implements Subject {
         return new Runnable() {
             @Override
             public void run() {
-                System.out.println(personService.get(Long.valueOf(id)));
+                try {
+                    Optional<Person> person = personService.get(Long.valueOf(id));
+                    if(person.isPresent()){
+                        System.out.println(person.get());
+                    }else{
+                        System.out.println("No such person is available!");
+                    }
+                }catch (Exception e){
+                    System.out.println(e.getMessage());
+                }
             }
         };
 
@@ -211,10 +227,14 @@ public class Bank implements Subject {
                 Optional<Person> person = personService.get(Long.valueOf(personId));
                 if(person.isPresent()){
                     BankAccount bankAccount = new BankAccount(person.get(),Long.valueOf(accountNumber),Long.valueOf(initialAmount));
-                    bankAccountService.create(bankAccount);
-                    System.out.println("Account created for " + person.get().getName());
+                    try{
+                        bankAccountService.create(bankAccount);
+                        System.out.println("Account created for " + person.get().getName() +" Successfully!");
+                    }catch (Exception e){
+                        System.out.println(e.getMessage());
+                    }
                 }else{
-                    System.out.println("Account created failed");
+                    System.out.println("Account creation failed");
                 }
             }
         };
@@ -227,7 +247,7 @@ public class Bank implements Subject {
             public void run() {
                 if(bankAccountService.exists(Long.valueOf(accountNumber))){
                     Optional<BankAccount> bankAccount = bankAccountService.fetch(Long.valueOf(accountNumber));
-                    bankAccount.get().setBalance(bankAccount.get().getBalance()+Long.valueOf(amount));
+                    bankAccount.get().setBalance(bankAccount.get().getBalance()+Long.parseLong(amount));
                     bankAccountService.update(bankAccount.get());
                     System.out.println("Deposit into account was successful");
                 }else{
