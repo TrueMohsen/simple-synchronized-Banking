@@ -6,19 +6,19 @@ import com.azkivam.simplesynchronizedbanking.services.BankAccountService;
 import com.azkivam.simplesynchronizedbanking.services.PersonService;
 import com.azkivam.simplesynchronizedbanking.utilities.Material;
 import com.azkivam.simplesynchronizedbanking.utilities.Receiver;
+import com.azkivam.simplesynchronizedbanking.utilities.Subject;
+import com.azkivam.simplesynchronizedbanking.utilities.TransactionObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Scanner;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @ShellComponent
-public class Bank {
+public class Bank implements Subject {
 
     @Autowired
     private PersonService personService;
@@ -31,11 +31,19 @@ public class Bank {
 
     ExecutorService executorService = Executors.newFixedThreadPool(10);
 
+    @Autowired
+    List<TransactionObserver> observers ;
 
+
+    Map<Material,String> state = new HashMap<>();
     @ShellMethod(value = "Switch.",key = "switch")
-    public void select(String switchKey){
+    public void select(String switchKey) throws IOException {
         switch (switchKey) {
-            case "1" -> executorService.execute(ListPersons());
+            case "1" -> {
+                setState(" ","List of Persons","zero");
+                Notify();
+                executorService.execute(ListPersons());
+            }
             case "2" -> executorService.execute(listAccounts());
             case "3" -> {
 //                Map<Material,Boolean> controlUnit = new HashMap<>();
@@ -238,5 +246,39 @@ public class Bank {
             }
         };
 
+    }
+
+    @Override
+    public void attach(TransactionObserver observer) {
+        observers.add(observer);
+
+    }
+
+    @Override
+    public void detach(TransactionObserver observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void Notify() throws IOException {
+        for( TransactionObserver o:observers){
+            o.update(this);
+        }
+    }
+
+    @Override
+    public Map<Material,String> getState() {
+        return this.state;
+    }
+
+    @Override
+    public void setState(String accountNumber, String transactionType, String amount ) {
+        this.state.put(Material.ACCOUNTNUMBER,accountNumber);
+        this.state.put(Material.TRANSACTIONTYPE,transactionType);
+        this.state.put(Material.AMOUNT,amount);
+    }
+
+    public Bank returnSelf(){
+        return this;
     }
 }
