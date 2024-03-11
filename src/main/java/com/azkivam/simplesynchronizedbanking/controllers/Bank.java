@@ -139,9 +139,10 @@ public class Bank implements Subject {
     }
 
     public synchronized void transfer(String sourceAccountNumber,String desAccountNumber,String amount){
-            if(bankAccountService.exists(Long.valueOf(sourceAccountNumber)) && bankAccountService.exists(Long.valueOf(desAccountNumber))){
-                Optional<BankAccount> sourceBankAccount = bankAccountService.fetch(Long.valueOf(sourceAccountNumber));
-                Optional<BankAccount> desBankAccount = bankAccountService.fetch(Long.valueOf(desAccountNumber));
+        Optional<BankAccount> sourceBankAccount = bankAccountService.fetchByAccountNumber(Long.valueOf(sourceAccountNumber));
+        Optional<BankAccount> desBankAccount = bankAccountService.fetchByAccountNumber(Long.valueOf(desAccountNumber));
+
+            if(sourceBankAccount.isPresent() && desBankAccount.isPresent()){
                 if(sourceBankAccount.get().getBalance() >= Long.parseLong(amount) ){
                     sourceBankAccount.get().setBalance(sourceBankAccount.get().getBalance()-Long.parseLong(amount));
                     desBankAccount.get().setBalance(desBankAccount.get().getBalance()+Long.parseLong(amount));
