@@ -4,17 +4,21 @@ import com.azkivam.simplesynchronizedbanking.entities.BankAccount;
 import com.azkivam.simplesynchronizedbanking.entities.Person;
 import com.azkivam.simplesynchronizedbanking.services.BankAccountService;
 import com.azkivam.simplesynchronizedbanking.services.PersonService;
+import com.azkivam.simplesynchronizedbanking.utilities.Material;
+import com.azkivam.simplesynchronizedbanking.utilities.Receiver;
+import com.azkivam.simplesynchronizedbanking.utilities.Subject;
+import com.azkivam.simplesynchronizedbanking.utilities.TransactionObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
-import java.util.Optional;
-import java.util.Scanner;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @ShellComponent
-public class Bank {
+public class Bank implements Subject {
 
     @Autowired
     private PersonService personService;
@@ -22,24 +26,40 @@ public class Bank {
     @Autowired
     private BankAccountService bankAccountService;
 
+    @Autowired
+    private Receiver receiver;
+
     ExecutorService executorService = Executors.newFixedThreadPool(10);
 
+    @Autowired
+    List<TransactionObserver> observers ;
+
+
+    Map<Material,String> state = new HashMap<>();
     @ShellMethod(value = "Switch.",key = "switch")
-    public void select(String switchKey){
+    public void select(String switchKey) throws IOException {
         switch (switchKey) {
-            case "1" -> executorService.execute(caseOneRunnable());
-            case "2" -> executorService.execute(caseTwoRunnable());
+            case "1" -> {
+                setState(" ","List of Persons","zero");
+                Notify();
+                executorService.execute(ListPersons());
+            }
+            case "2" -> executorService.execute(listAccounts());
             case "3" -> {
+//                Map<Material,Boolean> controlUnit = new HashMap<>();
+//                controlUnit.put(Material.NAME,true);
+//                Map<Material,String> result = receiver.receiveController(controlUnit);
                 Scanner scanner = new Scanner(System.in);
                 System.out.println("Enter name:");
                 String name = scanner.nextLine();
-                executorService.execute(caseThreeRunnable(name));
+//                System.out.println(result.get(Material.NAME));
+                executorService.execute(createPerson(name));
             }
             case "4" -> {
                 Scanner scanner = new Scanner(System.in);
                 System.out.println("Enter person Id:");
                 String Id = scanner.nextLine();
-                executorService.execute(caseFourRunnable(Id));
+                executorService.execute(getPerson(Id));
             }
             case "5" -> {
                 Scanner scanner = new Scanner(System.in);
@@ -49,7 +69,7 @@ public class Bank {
                 String accountNumber = scanner.nextLine();
                 System.out.println("Enter initial Amount:");
                 String initialAmount = scanner.nextLine();
-                executorService.execute(caseFiveRunnable(personId,accountNumber,initialAmount));
+                executorService.execute(createAccount(personId,accountNumber,initialAmount));
             }
 
             case "6" -> {
@@ -58,7 +78,7 @@ public class Bank {
                 String accountNumber = scanner.nextLine();
                 System.out.println("Enter amount:");
                 String amount = scanner.nextLine();
-                executorService.execute(caseSixRunnable(accountNumber,amount));
+                executorService.execute(deposit(accountNumber,amount));
             }
             case "7" -> {
                 Scanner scanner = new Scanner(System.in);
@@ -66,7 +86,7 @@ public class Bank {
                 String accountNumber = scanner.nextLine();
                 System.out.println("Enter amount:");
                 String amount = scanner.nextLine();
-                executorService.execute(caseSevenRunnable(accountNumber,amount));
+                executorService.execute(withdrawCase(accountNumber,amount));
             }
             case "8" -> {
                 Scanner scanner = new Scanner(System.in);
@@ -76,13 +96,13 @@ public class Bank {
                 String desAccountNumber = scanner.nextLine();
                 System.out.println("Enter amount:");
                 String amount = scanner.nextLine();
-                executorService.execute(caseEightRunnable(sourceAccountNumber,desAccountNumber,amount));
+                executorService.execute(transferCase(sourceAccountNumber,desAccountNumber,amount));
             }
             case "9" -> {
                 Scanner scanner = new Scanner(System.in);
                 System.out.println("Enter Account Number:");
                 String sourceAccountNumber = scanner.nextLine();
-                executorService.execute(caseNineRunnable(sourceAccountNumber));
+                executorService.execute(balanceCase(sourceAccountNumber));
             }
         }
 
@@ -107,6 +127,18 @@ public class Bank {
             }
     }
 
+    public synchronized void withdraw(String accountNumber, String amount){
+        if(bankAccountService.exists(Long.valueOf(accountNumber))){
+            Optional<BankAccount> bankAccount = bankAccountService.fetch(Long.valueOf(accountNumber));
+            //here it must be checked if it is greater than zero
+            bankAccount.get().setBalance(bankAccount.get().getBalance()-Long.parseLong(amount));
+            bankAccountService.update(bankAccount.get());
+            System.out.println("withdraw from account was successful");
+        }else{
+            System.out.println("There is no such account!");
+        }
+    }
+
 
     public synchronized void balance(String accountNumber){
             if(bankAccountService.exists(Long.valueOf(accountNumber))){
@@ -115,7 +147,7 @@ public class Bank {
             }
     }
 
-    public Runnable caseOneRunnable(){
+    public Runnable ListPersons(){
         return new Runnable() {
             @Override
             public void run() {
@@ -125,7 +157,7 @@ public class Bank {
 
     }
 
-    public Runnable caseTwoRunnable(){
+    public Runnable listAccounts(){
         return new Runnable() {
             @Override
             public void run() {
@@ -134,7 +166,7 @@ public class Bank {
         };
 
     }
-    public Runnable caseThreeRunnable(String name){
+    public Runnable createPerson(String name){
         return new Runnable() {
             @Override
             public void run() {
@@ -145,7 +177,7 @@ public class Bank {
         };
 
     }
-    public Runnable caseFourRunnable(String id){
+    public Runnable getPerson(String id){
         return new Runnable() {
             @Override
             public void run() {
@@ -154,7 +186,7 @@ public class Bank {
         };
 
     }
-    public Runnable caseFiveRunnable(String personId,String accountNumber,String initialAmount){
+    public Runnable createAccount(String personId,String accountNumber,String initialAmount){
         return new Runnable() {
             @Override
             public void run() {
@@ -171,7 +203,7 @@ public class Bank {
 
     }
 
-    public Runnable caseSixRunnable(String accountNumber,String amount){
+    public Runnable deposit(String accountNumber,String amount){
         return new Runnable() {
             @Override
             public void run() {
@@ -187,24 +219,16 @@ public class Bank {
         };
 
     }
-    public Runnable caseSevenRunnable(String accountNumber,String amount){
+    public Runnable withdrawCase(String accountNumber,String amount){
         return new Runnable() {
             @Override
             public void run() {
-                if(bankAccountService.exists(Long.valueOf(accountNumber))){
-                    Optional<BankAccount> bankAccount = bankAccountService.fetch(Long.valueOf(accountNumber));
-                    //here it must be checked if it is greater than zero
-                    bankAccount.get().setBalance(bankAccount.get().getBalance()-Long.parseLong(amount));
-                    bankAccountService.update(bankAccount.get());
-                    System.out.println("withdraw from account was successful");
-                }else{
-                    System.out.println("There is no such account!");
-                }
+                withdraw(accountNumber, amount);
             }
         };
 
     }
-    public Runnable caseEightRunnable(String sourceAccountNumber,String desAccountNumber,String amount){
+    public Runnable transferCase(String sourceAccountNumber,String desAccountNumber,String amount){
         return new Runnable() {
             @Override
             public void run() {
@@ -214,7 +238,7 @@ public class Bank {
 
     }
 
-    public Runnable caseNineRunnable(String sourceAccountNumber){
+    public Runnable balanceCase(String sourceAccountNumber){
         return new Runnable() {
             @Override
             public void run() {
@@ -222,5 +246,39 @@ public class Bank {
             }
         };
 
+    }
+
+    @Override
+    public void attach(TransactionObserver observer) {
+        observers.add(observer);
+
+    }
+
+    @Override
+    public void detach(TransactionObserver observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void Notify() throws IOException {
+        for( TransactionObserver o:observers){
+            o.update(this);
+        }
+    }
+
+    @Override
+    public Map<Material,String> getState() {
+        return this.state;
+    }
+
+    @Override
+    public void setState(String accountNumber, String transactionType, String amount ) {
+        this.state.put(Material.ACCOUNTNUMBER,accountNumber);
+        this.state.put(Material.TRANSACTIONTYPE,transactionType);
+        this.state.put(Material.AMOUNT,amount);
+    }
+
+    public Bank returnSelf(){
+        return this;
     }
 }
