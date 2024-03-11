@@ -40,11 +40,15 @@ public class Bank implements Subject {
     public void select(String switchKey) throws IOException {
         switch (switchKey) {
             case "1" -> {
-                setState(" ","List of Persons","zero");
+                setState("None ","List of Persons","None");
                 Notify();
                 executorService.execute(ListPersons());
             }
-            case "2" -> executorService.execute(listAccounts());
+            case "2" -> {
+                setState("None ","List of Accounts","None");
+                Notify();
+                executorService.execute(listAccounts());
+            }
             case "3" -> {
 //                Map<Material,Boolean> controlUnit = new HashMap<>();
 //                controlUnit.put(Material.NAME,true);
@@ -53,12 +57,16 @@ public class Bank implements Subject {
                 System.out.println("Enter name:");
                 String name = scanner.nextLine();
 //                System.out.println(result.get(Material.NAME));
+                setState("None ","Create Person","None");
+                Notify();
                 executorService.execute(createPerson(name));
             }
             case "4" -> {
                 Scanner scanner = new Scanner(System.in);
                 System.out.println("Enter person Id:");
                 String Id = scanner.nextLine();
+                setState("None ","Get Person","None");
+                Notify();
                 executorService.execute(getPerson(Id));
             }
             case "5" -> {
@@ -69,6 +77,8 @@ public class Bank implements Subject {
                 String accountNumber = scanner.nextLine();
                 System.out.println("Enter initial Amount:");
                 String initialAmount = scanner.nextLine();
+                setState("None ","Create Account","None");
+                Notify();
                 executorService.execute(createAccount(personId,accountNumber,initialAmount));
             }
 
@@ -78,6 +88,8 @@ public class Bank implements Subject {
                 String accountNumber = scanner.nextLine();
                 System.out.println("Enter amount:");
                 String amount = scanner.nextLine();
+                setState(accountNumber,"Deposit",amount);
+                Notify();
                 executorService.execute(deposit(accountNumber,amount));
             }
             case "7" -> {
@@ -86,6 +98,8 @@ public class Bank implements Subject {
                 String accountNumber = scanner.nextLine();
                 System.out.println("Enter amount:");
                 String amount = scanner.nextLine();
+                setState(accountNumber,"withdraw",amount);
+                Notify();
                 executorService.execute(withdrawCase(accountNumber,amount));
             }
             case "8" -> {
@@ -96,12 +110,16 @@ public class Bank implements Subject {
                 String desAccountNumber = scanner.nextLine();
                 System.out.println("Enter amount:");
                 String amount = scanner.nextLine();
+                setState(sourceAccountNumber+" to "+desAccountNumber,"transfer",amount);
+                Notify();
                 executorService.execute(transferCase(sourceAccountNumber,desAccountNumber,amount));
             }
             case "9" -> {
                 Scanner scanner = new Scanner(System.in);
                 System.out.println("Enter Account Number:");
                 String sourceAccountNumber = scanner.nextLine();
+                setState(sourceAccountNumber,"balance","None");
+                Notify();
                 executorService.execute(balanceCase(sourceAccountNumber));
             }
         }

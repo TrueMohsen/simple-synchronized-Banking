@@ -30,7 +30,6 @@ public class ConcreteObserver implements TransactionObserver{
         printWriter.print(accountNumber);
         printWriter.print(transactionType);
         printWriter.printf(amount);
-//        printWriter.printf(accountNumber);
         printWriter.close();
     }
 
