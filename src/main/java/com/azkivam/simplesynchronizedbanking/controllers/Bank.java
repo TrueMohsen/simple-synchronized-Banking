@@ -137,11 +137,15 @@ public class Bank implements Subject {
 
             if(sourceBankAccount.isPresent() && desBankAccount.isPresent()){
                 if(sourceBankAccount.get().getBalance() >= Long.parseLong(amount) ){
-                    sourceBankAccount.get().setBalance(sourceBankAccount.get().getBalance()-Long.parseLong(amount));
-                    desBankAccount.get().setBalance(desBankAccount.get().getBalance()+Long.parseLong(amount));
-                    bankAccountService.update(sourceBankAccount.get());
-                    bankAccountService.update(desBankAccount.get());
-                    System.out.println("transfer Successful!");
+                    try{
+                        sourceBankAccount.get().setBalance(sourceBankAccount.get().getBalance()-Long.parseLong(amount));
+                        desBankAccount.get().setBalance(desBankAccount.get().getBalance()+Long.parseLong(amount));
+                        bankAccountService.update(sourceBankAccount.get());
+                        bankAccountService.update(desBankAccount.get());
+                        System.out.println("transfer Successful!");
+                    }catch(Exception e){
+                        System.out.println(e.getMessage());
+                    }
                 }else{
                     System.out.println("Not enough balance to transfer!");
                 }
@@ -155,9 +159,14 @@ public class Bank implements Subject {
         Optional<BankAccount> bankAccount = bankAccountService.fetchByAccountNumber(Long.valueOf(accountNumber));
         if(bankAccount.isPresent()){
             if(bankAccount.get().getBalance() >= Long.parseLong(amount)){
-                bankAccount.get().setBalance(bankAccount.get().getBalance()-Long.parseLong(amount));
-                bankAccountService.update(bankAccount.get());
-                System.out.println("withdraw from account was successful");
+                try{
+                    bankAccount.get().setBalance(bankAccount.get().getBalance()-Long.parseLong(amount));
+                    bankAccountService.update(bankAccount.get());
+                    System.out.println("withdraw from account was successful");
+                }catch(Exception e){
+                    System.out.println(e.getMessage());
+                }
+
             }else{
                 System.out.println("There is not enough balance!");
             }
@@ -170,9 +179,13 @@ public class Bank implements Subject {
         Optional<BankAccount> bankAccount = bankAccountService.fetchByAccountNumber(Long.valueOf(accountNumber));
 
         if(bankAccount.isPresent()){
-            bankAccount.get().setBalance(bankAccount.get().getBalance()+Long.parseLong(amount));
-            bankAccountService.update(bankAccount.get());
-            System.out.println("Deposit into account was successful");
+            try{
+                bankAccount.get().setBalance(bankAccount.get().getBalance()+Long.parseLong(amount));
+                bankAccountService.update(bankAccount.get());
+                System.out.println("Deposit into account was successful");
+            }catch (Exception e){
+                System.out.println(e.getMessage());
+            }
         }else{
             System.out.println("There is no such account!");
         }
