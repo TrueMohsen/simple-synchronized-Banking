@@ -17,7 +17,6 @@ public class ConcreteObserver implements TransactionObserver{
     Map<Material,String> state = new HashMap<>();
 
     public ConcreteObserver() {
-        //inja
         subject = new Bank().returnSelf();
         state =  this.subject.getState();
     }
@@ -25,7 +24,7 @@ public class ConcreteObserver implements TransactionObserver{
     @Override
     public void onTransaction(String accountNumber, String transactionType, String amount) throws IOException {
 //        print to file
-        FileWriter fileWriter = new FileWriter("M:\\master\\azkivam\\logger.txt");
+        FileWriter fileWriter = new FileWriter("M:\\master\\azkivam\\logger.txt",true);
         PrintWriter printWriter = new PrintWriter(fileWriter);
         printWriter.print(accountNumber);
         printWriter.print(transactionType);

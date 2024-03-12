@@ -18,9 +18,6 @@ public class Person {
         this.name = name;
     }
 
-//    public Person(Long id) {
-//        this.id = id;
-//    }
 
     private String name;
 
