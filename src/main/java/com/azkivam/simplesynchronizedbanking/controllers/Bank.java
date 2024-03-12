@@ -38,7 +38,6 @@ public class Bank implements Subject {
     @Autowired
     private InputValidator validator;
 
-
     Map<Material,String> state = new HashMap<>();
     Scanner scanner = new Scanner(System.in);
     @ShellMethod(value = "Switch.",key = "switch")
