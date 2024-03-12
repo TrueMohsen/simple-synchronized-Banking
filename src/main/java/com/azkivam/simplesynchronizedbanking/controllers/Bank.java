@@ -40,6 +40,7 @@ public class Bank implements Subject {
 
 
     Map<Material,String> state = new HashMap<>();
+    Scanner scanner = new Scanner(System.in);
     @ShellMethod(value = "Switch.",key = "switch")
     public void select(String switchKey) throws IOException {
         switch (switchKey) {
@@ -57,7 +58,6 @@ public class Bank implements Subject {
 //                Map<Material,Boolean> controlUnit = new HashMap<>();
 //                controlUnit.put(Material.NAME,true);
 //                Map<Material,String> result = receiver.receiveController(controlUnit);
-                Scanner scanner = new Scanner(System.in);
                 System.out.println("Enter name:");
                 String name = scanner.nextLine();
 //                System.out.println(result.get(Material.NAME));
@@ -66,7 +66,6 @@ public class Bank implements Subject {
                 executorService.execute(createPerson(name));
             }
             case "4" -> {
-                Scanner scanner = new Scanner(System.in);
                 System.out.println("Enter person Id:");
                 String Id = scanner.nextLine();
                 setState(" None "," Get Person "," None ");
@@ -74,7 +73,6 @@ public class Bank implements Subject {
                 executorService.execute(getPerson(Id));
             }
             case "5" -> {
-                Scanner scanner = new Scanner(System.in);
                 System.out.println("Enter person Id:");
                 String personId = scanner.nextLine();
                 System.out.println("Enter account Number:");
@@ -87,7 +85,6 @@ public class Bank implements Subject {
             }
 
             case "6" -> {
-                Scanner scanner = new Scanner(System.in);
                 System.out.println("Enter account Number:");
                 String accountNumber = scanner.nextLine();
                 System.out.println("Enter amount:");
@@ -97,7 +94,6 @@ public class Bank implements Subject {
                 executorService.execute(depositCase(accountNumber,amount));
             }
             case "7" -> {
-                Scanner scanner = new Scanner(System.in);
                 System.out.println("Enter accountNumber:");
                 String accountNumber = scanner.nextLine();
                 System.out.println("Enter amount:");
@@ -107,7 +103,6 @@ public class Bank implements Subject {
                 executorService.execute(withdrawCase(accountNumber,amount));
             }
             case "8" -> {
-                Scanner scanner = new Scanner(System.in);
                 System.out.println("Enter source Account Number:");
                 String sourceAccountNumber = scanner.nextLine();
                 System.out.println("Enter destination Account Number:");
@@ -119,7 +114,6 @@ public class Bank implements Subject {
                 executorService.execute(transferCase(sourceAccountNumber,desAccountNumber,amount));
             }
             case "9" -> {
-                Scanner scanner = new Scanner(System.in);
                 System.out.println("Enter Account Number:");
                 String sourceAccountNumber = scanner.nextLine();
                 setState(sourceAccountNumber," balance "," None ");
@@ -127,7 +121,6 @@ public class Bank implements Subject {
                 executorService.execute(balanceCase(sourceAccountNumber));
             }
             case "10" -> {
-                Scanner scanner = new Scanner(System.in);
                 System.out.println("Enter Person Id:");
                 String personID = scanner.nextLine();
                 setState(" None "," Delete Person "," None ");
@@ -161,11 +154,13 @@ public class Bank implements Subject {
     public synchronized void withdraw(String accountNumber, String amount){
         Optional<BankAccount> bankAccount = bankAccountService.fetchByAccountNumber(Long.valueOf(accountNumber));
         if(bankAccount.isPresent()){
-
-            //here it must be checked if it is greater than zero
-            bankAccount.get().setBalance(bankAccount.get().getBalance()-Long.parseLong(amount));
-            bankAccountService.update(bankAccount.get());
-            System.out.println("withdraw from account was successful");
+            if(bankAccount.get().getBalance() >= Long.parseLong(amount)){
+                bankAccount.get().setBalance(bankAccount.get().getBalance()-Long.parseLong(amount));
+                bankAccountService.update(bankAccount.get());
+                System.out.println("withdraw from account was successful");
+            }else{
+                System.out.println("There is not enough balance!");
+            }
         }else{
             System.out.println("There is no such account!");
         }
